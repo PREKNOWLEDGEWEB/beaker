@@ -1,0 +1,40 @@
+# This workflow will do a clean install of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Node.js CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+        
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+      - name: Install Node.js or Init
+        uses: actions/setup-node@v1
+        with:
+          node-version: 14
+      - name: Install dependencies
+        run: cd scripts && npm install && npm run rebuild
+      - name: Build
+        run: cd scripts && npm run build
+      - name: Build Electron Builder
+        run: cd scripts && npm run release
+      - name: Upload Executables
+        uses: actions/upload-artifact@v2
+        with:
+          name: xbrowse-${{matrix.os}}
+          path: |
+            dist/
+
